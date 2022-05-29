@@ -1,22 +1,55 @@
-from django.forms import model_to_dict
-from django.shortcuts import render
-from rest_framework import generics, viewsets
+import django_filters.rest_framework
+from django.db.models import Q
+from rest_framework import generics, viewsets, filters
 from rest_framework.decorators import action
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .models import Customer, Type
-from .serializers import CustomerSerializer
+from .serializers import CustomerSerializer, TypeSerializer
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'email']
 
-    @action(detail=False)
+
+class TypeViewSet(viewsets.ModelViewSet):
+    queryset = Type.objects.all()
+    serializer_class = TypeSerializer
+
+    @action(methods=['GET'], detail=False)
     def rentype(self, request):
         types = Type.objects.all()
         return Response({'types': [type.name for type in types]})
+
+    @action(methods=['POST'], detail=False)
+    def addrentype(self, request, pk=None):
+        rentype = self.queryset.create(name=request.data.get('name'))
+        rentype.save()
+        return Response({'new_type': "success"})
+
+
+class GetCustomerFromCustomerView(ListAPIView):
+    serializer_class = CustomerSerializer
+
+    def get_queryset(self):
+        name = self.kwargs['name']
+        return Customer.objects.filter(name=name)
+
+
+class GetRomaCustomerView(ListAPIView):
+    queryset = Customer.objects.filter(Q(name='roma') | Q(name='Roma'))
+    serializer_class = CustomerSerializer
+
+
+
+
+
+
+
 
 
 
