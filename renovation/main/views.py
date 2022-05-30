@@ -4,7 +4,6 @@ from rest_framework import generics, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
-
 from .models import Customer, Type
 from .serializers import CustomerSerializer, TypeSerializer
 
@@ -19,6 +18,8 @@ class CustomerViewSet(viewsets.ModelViewSet):
 class TypeViewSet(viewsets.ModelViewSet):
     queryset = Type.objects.all()
     serializer_class = TypeSerializer
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+    filterset_fields = ['name']
 
     @action(methods=['GET'], detail=False)
     def rentype(self, request):

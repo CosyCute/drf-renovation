@@ -12,6 +12,13 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = Customer
         fields = '__all__'
 
+    def validate_email(self, attrs):
+        email = attrs['email']
+        if not email.find('@') and email.find('.'):
+            raise serializers.ValidationError({'customer': "Некорректный адрес электронной почты"})
+        return attrs
+
+
 
 class TypeSerializer(serializers.ModelSerializer):
     class Meta:
